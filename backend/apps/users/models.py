@@ -22,9 +22,3 @@ class User(AbstractUser):
 
     def __str__(self):
         return f'User: {self.username}'
-
-    def save(self, *args, **kwargs):
-        if self._state.adding:
-            if self.username_with_tag is not None:
-                self.username = self.username_with_tag.strip('#')[0]
-        super().save(*args, **kwargs)

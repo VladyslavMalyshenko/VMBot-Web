@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
 
     # applications
     'apps.users'
@@ -108,6 +109,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # AUTH USER MODEL
 AUTH_USER_MODEL = 'users.User'
+
+# DISCORD INTEGRATION
+DISCORD_CLIENT_ID = os.getenv('DISCORD_CLIENT_ID')
+DISCORD_CLIENT_SECRET = os.getenv('DISCORD_CLIENT_SECRET')
+DISCORD_SCOPE = os.getenv('DISCORD_SCOPE')
+DISCORD_GRANT_TYPE = os.getenv('DISCORD_GRANT_TYPE')
+DISCORD_REDIRECT_URI = os.getenv('DISCORD_REDIRECT_URI')
+DISCORD_LOGIN_URL = os.getenv('DISCORD_LOGIN_URL')
+DISCORD_TOKEN_URL = os.getenv('DISCORD_TOKEN_URL')
+DISCORD_API_URL = os.getenv('DISCORD_API_URL')
 
 # JAZZMIN
 
