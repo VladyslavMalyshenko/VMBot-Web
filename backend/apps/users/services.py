@@ -1,75 +1,41 @@
-import os
+from typing import NamedTuple, Optional
 
-import requests
-
-from django.conf import settings
-from dotenv import load_dotenv
-
-from .utils import get_encoded_url
-
-load_dotenv()
+from .models import User
+from .discord import DiscordUserMixin
 
 
-class PayloadHeadersMixin:
+class UserData(NamedTuple):
+    user: Optional[User] = None
+    error: Optional[str] = None
 
-    @staticmethod
-    def get_payload(code):
-        return {
-            'client_id': os.getenv('DISCORD_CLIENT_ID'),
-            'client_secret': os.getenv('DISCORD_CLIENT_SECRET'),
-            'grant_type': os.getenv('DISCORD_GRANT_TYPE'),
-            'code': code,
-            'redirect_uri': os.getenv('DISCORD_REDIRECT_URI'),
-            'scope': os.getenv('DISCORD_SCOPE')
-        }
 
-    @property
-    def redirect_uri(self):
-        return get_encoded_url(os.getenv('DISCORD_REDIRECT_URI'))
+class UserService:
 
-    @property
-    def login_url(self):
-        url = os.getenv('DISCORD_LOGIN_URL').replace('{}', self.redirect_uri)
-        return url
+    @classmethod
+    def check_user_exists_by_fields(cls, fields: dict) -> bool:
+        result = False
+        for field, value in fields.items():
+            try:
+                result = User.objects.filter(**{field: value}).exists()
+            except (Exception,):
+                result = False
+        return result
 
-    @property
-    def user_url(self):
-        return f'{os.getenv("DISCORD_API_URL")}/users/@me'
+    def user_exists_by_discord_id(self, discord_id):
+        return self.check_user_exists_by_fields({
+            'discord_id': discord_id
+        })
 
     @staticmethod
-    def get_user_avatar(user_id, avatar_code):
-        return f'https://cdn.discordapp.com/avatars/{user_id}/{avatar_code}.png?size=2048'
+    def get_user_by_data(data: dict):
+        try:
+            return User.objects.get(**data)
+        except User.DoesNotExist:
+            return None
 
 
-class DiscordUserMixin(PayloadHeadersMixin):
-
-    @staticmethod
-    def _token_url_post(payload: dict):
-        token = requests.post(url=os.getenv('DISCORD_TOKEN_URL'), data=payload).json()
-        access_token = token.get('access_token')
-        return access_token
-
-    def get_access_token(self, code):
-        payload = self.get_payload(code)
-        return self._token_url_post(payload)
-
-    def get_user_json(self, access_token):
-        headers = {'Authorization': f'Bearer {access_token}'}
-        user_data = requests.get(url=self.user_url, headers=headers).json()
-        return user_data
-
-    def get_data_for_serializer(self, user_data: dict):
-        return {
-            'username': user_data['username'],
-            'username_with_tag': user_data['discriminator'],
-            'discord_id': user_data['id'],
-            'avatar': self.get_user_avatar(user_data['id'], user_data['avatar']),
-            'email': user_data['email']
-        }
-
-    def get_user(self, code):
-        access_token = self.get_access_token(code)
-        user = self.get_user_json(access_token)
-        data = self.get_data_for_serializer(user)
-        print(data)
-        return data
+def get_user_by_discord_id(discord_id):
+    try:
+        return User.objects.get(discord_id=discord_id)
+    except User.DoesNotExist:
+        return None

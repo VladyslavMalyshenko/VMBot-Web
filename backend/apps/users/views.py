@@ -1,55 +1,39 @@
-from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import mixins, viewsets, status, generics
+
+from .services import UserService
+from rest_framework import status, generics
 
 from django.shortcuts import redirect
 
-from .models import User
 from .serializers import UserSerializer, DiscordUserSerializer
-from .services import DiscordUserMixin, PayloadHeadersMixin
+from .services import (get_user_by_discord_id)
+from .discord import PayloadAndHeadersMixin, DiscordUserMixin
+from .jwt_auth import JwtAuthentication
 
 
-def test_token(request):
-    s = PayloadHeadersMixin()
-    return redirect(s.login_url)
-
-
-class DiscordUserCreate(DiscordUserMixin,
-                        generics.GenericAPIView):
+class DiscordUserAuth(UserService,
+                      DiscordUserMixin,
+                      generics.GenericAPIView):
     serializer_class = DiscordUserSerializer
 
     def post(self, *args, **kwargs):
-        discord_code = self.request.query_params.get('code')
-        if discord_code is None:
-            return Response({
-                'error': 'Invalid discord code'
-            }, status=status.HTTP_403_FORBIDDEN)
-
+        discord_code = self.request.data.get('code')
         data = self.get_user(discord_code)
-        serializer = UserSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if data is None:
+            return Response({
+                'Something went wrong... Please, try again.'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
+        user_exists = self.user_exists_by_discord_id(data['discord_id'])
+        login_data = {}
 
-class UserViewSet(DiscordUserMixin,
-                  mixins.RetrieveModelMixin,
-                  mixins.CreateModelMixin,
-                  viewsets.GenericViewSet):
-    serializer_class = UserSerializer
-    queryset = User.objects.all()
-
-
-class GetUserAPIVIew(DiscordUserMixin, APIView):
-    pass
-
-    # def post(self, *args, **kwargs):
-    #     code = self.request.query_params.get('code')
-    #
-    #     if code is None:
-    #         return Response({'error': 'The code is None!'}, status=400)
-    #
-    #     access_token = get_access_token(code)
-    #     user_json = get_user_json(access_token)
-    #     return Response({'user': user_json}, status=200)
+        if not user_exists:
+            serializer = UserSerializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            user = serializer.save()
+        else:
+            user = get_user_by_discord_id(data['discord_id'])
+        login_data['discord_id'] = user.discord_id
+        tokens = JwtAuthentication.get_jwt_auth(login_data)
+        return Response(tokens, status=status.HTTP_200_OK)

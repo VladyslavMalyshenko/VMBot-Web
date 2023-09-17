@@ -11,7 +11,7 @@ class UserAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Global info', {'fields': ('username', 'last_login')}),
-        ('Global info', {'fields': (
+        ('Detail', {'fields': (
             'username_with_tag',
             'discord_id',
             'avatar',

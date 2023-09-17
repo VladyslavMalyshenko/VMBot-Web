@@ -1,9 +1,7 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from django.urls import path
 
-from .views import test_token, UserViewSet, DiscordUserCreate
+from .views import DiscordUserAuth
 
 urlpatterns = [
-    path('test_token/', test_token),
-    path('create/', DiscordUserCreate.as_view())
+    path('login/', DiscordUserAuth.as_view())
 ]

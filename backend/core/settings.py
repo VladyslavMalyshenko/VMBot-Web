@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 
 from pathlib import Path
 from dotenv import load_dotenv
@@ -92,6 +93,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# REST FRAMEWORK
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'apps.users.jwt_auth.JwtAuthentication',
+    )
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
@@ -119,6 +127,12 @@ DISCORD_REDIRECT_URI = os.getenv('DISCORD_REDIRECT_URI')
 DISCORD_LOGIN_URL = os.getenv('DISCORD_LOGIN_URL')
 DISCORD_TOKEN_URL = os.getenv('DISCORD_TOKEN_URL')
 DISCORD_API_URL = os.getenv('DISCORD_API_URL')
+
+# JWT AUTH SETTINGS
+AUTH_HEADER = 'Bearer'
+ACCESS_TOKEN_LIFETIME = timedelta(days=1)
+REFRESH_TOKEN_LIFETIME = timedelta(days=2)
+ALGORITHM = 'HS256'
 
 # JAZZMIN
 
