@@ -1,0 +1,57 @@
+html,
+body {
+    font-family: 'Inter';
+    width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    background-color: #151E3E;
+}
+
+:root {
+    width: 100%;
+    height: auto;
+}
+
+.App {
+    width: 100%;
+    height: auto;
+}
+
+.header {
+    margin: 0;
+    font-size: 50px;
+}
+
+.header--mid {
+    margin: 0;
+    font-size: 35px;
+}
+
+.header--sml {
+    margin: 0;
+    font-size: 20px;
+}
+
+.descr {
+    margin: 0;
+    font-size: 20px;
+}
+
+.left {
+    align-items: start;
+    text-align: left;
+}
+
+.right {
+    align-items: end;
+    text-align: right;
+}
+
+.white {
+    color: #fff;
+}
+
+.black {
+    color: #000;
+}
