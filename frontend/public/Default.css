@@ -48,6 +48,30 @@ body {
     text-align: right;
 }
 
+.up--anim {
+    opacity: 0;
+    transition: 1.5s;
+    transform: translateY(100px);
+}
+
+.up_show {
+    opacity: 1;
+    transition: 1.5s;
+    transform: translateY(0);
+}
+
+.left--anim {
+    opacity: 0;
+    transition: 1.5s;
+    transform: translateX(50px);
+}
+
+.left_show {
+    opacity: 1;
+    transition: 1.5s;
+    transform: translateX(0);
+}
+
 .white {
     color: #fff;
 }
